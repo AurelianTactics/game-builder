@@ -1,0 +1,103 @@
+name: Build Game
+
+on:
+  issues:
+    types: [opened, reopened]
+
+jobs:
+  build:
+    # Only run if the issue has the game-request label or title starts with [Game]
+    if: contains(github.event.issue.labels.*.name, 'game-request') || startsWith(github.event.issue.title, '[Game]')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Claude Game Builder"
+          git config --global user.email "claude-bot@users.noreply.github.com"
+
+      - name: Create branch for this game
+        run: |
+          git checkout -b game-${{ github.event.issue.number }}
+
+      - name: Build the game with Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "
+          You are building a game based on a GitHub issue request.
+
+          Issue #${{ github.event.issue.number }}
+          Title: ${{ github.event.issue.title }}
+
+          Body:
+          ${{ github.event.issue.body }}
+
+          INSTRUCTIONS:
+          1. Create a folder: games/${{ github.event.issue.number }}/
+          2. Build the requested game as a single index.html file in that folder
+          3. The HTML file must be completely standalone (all CSS and JS inline)
+          4. Make it visually appealing with good styling
+          5. Ensure it works well on both desktop and mobile
+          6. Add a title and brief instructions within the game
+          7. Include a 'Back to Games' link at the bottom pointing to '../../'
+
+          After creating the game, commit your changes with a descriptive message.
+          " --dangerously-skip-permissions --max-turns 30
+
+      - name: Push changes
+        run: |
+          git push origin game-${{ github.event.issue.number }}
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "Game: ${{ github.event.issue.title }}" \
+            --body "## New Game Built by Claude
+
+          This PR adds a new game requested in issue #${{ github.event.issue.number }}.
+
+          **Play it here after merge:** [Game #${{ github.event.issue.number }}](../games/${{ github.event.issue.number }}/)
+
+          ---
+          Closes #${{ github.event.issue.number }}
+
+          *Built automatically by Claude*" \
+            --base main \
+            --head game-${{ github.event.issue.number }}
+
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge game-${{ github.event.issue.number }} --auto --squash || echo "Auto-merge not enabled or PR not ready"
+
+      - name: Comment on issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "🎮 **Your game is being built!**
+
+          Claude has created your game and opened a pull request. Once merged, you can play it at:
+
+          **[Play Game #${{ github.event.issue.number }}](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/games/${{ github.event.issue.number }}/)**
+
+          Track progress in the [Actions tab](https://github.com/${{ github.repository }}/actions)."

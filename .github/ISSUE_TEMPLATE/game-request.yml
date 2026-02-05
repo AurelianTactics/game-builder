@@ -1,0 +1,47 @@
+name: Game Request
+description: Request a new game to be built by Claude
+title: "[Game] "
+labels: ["game-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Request a Game
+        Describe the game you want Claude to build. Be as specific as you like!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Game Description
+      description: Describe the game you want built
+      placeholder: |
+        Example: Make a tic tac toe game with a nice modern UI.
+        Include a score tracker and the ability to restart the game.
+    validations:
+      required: true
+
+  - type: textarea
+    id: features
+    attributes:
+      label: Additional Features (Optional)
+      description: Any specific features or requirements?
+      placeholder: |
+        - Dark mode
+        - Sound effects
+        - Mobile-friendly
+    validations:
+      required: false
+
+  - type: dropdown
+    id: style
+    attributes:
+      label: Visual Style
+      description: What visual style do you prefer?
+      options:
+        - Modern/Minimal
+        - Retro/Pixel Art
+        - Colorful/Fun
+        - Dark/Sleek
+        - No preference
+    validations:
+      required: false
