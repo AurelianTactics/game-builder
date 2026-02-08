@@ -1,6 +1,6 @@
 # Game Builder
 
-An autonomous game building system powered by Claude. Request a game by creating an issue, and Claude will build it automatically!
+Testing using GitHub Actions to trigger Claude.
 
 ## How It Works
 
