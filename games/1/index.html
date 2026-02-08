@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .player-x {
+            color: #667eea;
+        }
+
+        .player-o {
+            color: #764ba2;
+        }
+
+        .game-info {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            min-height: 30px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: #f5f7fa;
+            border: none;
+            border-radius: 10px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell:hover:not(.taken) {
+            background: #e8ecf1;
+            transform: scale(1.05);
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #667eea;
+            animation: pop 0.3s ease;
+        }
+
+        .cell.o {
+            color: #764ba2;
+            animation: pop 0.3s ease;
+        }
+
+        .cell.winner {
+            background: #ffd700;
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .reset-scores-btn {
+            background: #f5f7fa;
+            color: #666;
+        }
+
+        .reset-scores-btn:hover {
+            background: #e8ecf1;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #764ba2;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .cell {
+                font-size: 2em;
+            }
+
+            .score-value {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <p class="instructions">Take turns placing X's and O's. Get three in a row to win!</p>
+
+        <div class="scoreboard">
+            <div class="score-item">
+                <div class="score-label">Player X</div>
+                <div class="score-value player-x" id="scoreX">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Draws</div>
+                <div class="score-value" id="scoreDraw">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Player O</div>
+                <div class="score-value player-o" id="scoreO">0</div>
+            </div>
+        </div>
+
+        <div class="game-info" id="gameInfo">Player X's turn</div>
+
+        <div class="board" id="board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+
+        <div class="controls">
+            <button class="restart-btn" id="restartBtn">Restart Game</button>
+            <button class="reset-scores-btn" id="resetScoresBtn">Reset Scores</button>
+        </div>
+
+        <div class="back-link">
+            <a href="../../">← Back to Games</a>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let scores = {
+            X: 0,
+            O: 0,
+            draw: 0
+        };
+
+        // Load scores from localStorage
+        function loadScores() {
+            const savedScores = localStorage.getItem('tictactoe-scores');
+            if (savedScores) {
+                scores = JSON.parse(savedScores);
+                updateScoreDisplay();
+            }
+        }
+
+        // Save scores to localStorage
+        function saveScores() {
+            localStorage.setItem('tictactoe-scores', JSON.stringify(scores));
+        }
+
+        // Winning combinations
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // DOM elements
+        const cells = document.querySelectorAll('.cell');
+        const gameInfo = document.getElementById('gameInfo');
+        const restartBtn = document.getElementById('restartBtn');
+        const resetScoresBtn = document.getElementById('resetScoresBtn');
+        const scoreXElement = document.getElementById('scoreX');
+        const scoreOElement = document.getElementById('scoreO');
+        const scoreDrawElement = document.getElementById('scoreDraw');
+
+        // Initialize game
+        function init() {
+            loadScores();
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+            restartBtn.addEventListener('click', restartGame);
+            resetScoresBtn.addEventListener('click', resetScores);
+        }
+
+        // Handle cell click
+        function handleCellClick(e) {
+            const cell = e.target;
+            const index = cell.getAttribute('data-index');
+
+            if (board[index] !== '' || !gameActive) {
+                return;
+            }
+
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add('taken');
+            cell.classList.add(currentPlayer.toLowerCase());
+
+            checkResult();
+        }
+
+        // Check game result
+        function checkResult() {
+            let roundWon = false;
+            let winningCombination = null;
+
+            for (let i = 0; i < winningConditions.length; i++) {
+                const condition = winningConditions[i];
+                const a = board[condition[0]];
+                const b = board[condition[1]];
+                const c = board[condition[2]];
+
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+
+                if (a === b && b === c) {
+                    roundWon = true;
+                    winningCombination = condition;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                gameInfo.textContent = `Player ${currentPlayer} wins!`;
+                gameActive = false;
+                scores[currentPlayer]++;
+                saveScores();
+                updateScoreDisplay();
+                highlightWinningCells(winningCombination);
+                return;
+            }
+
+            // Check for draw
+            if (!board.includes('')) {
+                gameInfo.textContent = "It's a draw!";
+                gameActive = false;
+                scores.draw++;
+                saveScores();
+                updateScoreDisplay();
+                return;
+            }
+
+            // Continue game
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            gameInfo.textContent = `Player ${currentPlayer}'s turn`;
+        }
+
+        // Highlight winning cells
+        function highlightWinningCells(combination) {
+            combination.forEach(index => {
+                cells[index].classList.add('winner');
+            });
+        }
+
+        // Update score display
+        function updateScoreDisplay() {
+            scoreXElement.textContent = scores.X;
+            scoreOElement.textContent = scores.O;
+            scoreDrawElement.textContent = scores.draw;
+        }
+
+        // Restart game
+        function restartGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            gameInfo.textContent = `Player ${currentPlayer}'s turn`;
+
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'x', 'o', 'winner');
+            });
+        }
+
+        // Reset scores
+        function resetScores() {
+            if (confirm('Are you sure you want to reset all scores?')) {
+                scores = { X: 0, O: 0, draw: 0 };
+                saveScores();
+                updateScoreDisplay();
+            }
+        }
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
