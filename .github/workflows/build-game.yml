@@ -34,7 +34,8 @@ jobs:
 
       - name: Create branch for this game
         run: |
-          git checkout -b game-${{ github.event.issue.number }}
+          git fetch origin game-${{ github.event.issue.number }} || true
+          git checkout -B game-${{ github.event.issue.number }}
 
       - name: Build the game with Claude
         env:
@@ -63,15 +64,20 @@ jobs:
 
       - name: Push changes
         run: |
-          git push origin game-${{ github.event.issue.number }}
+          git push --force origin game-${{ github.event.issue.number }}
 
       - name: Create Pull Request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create \
-            --title "Game: ${{ github.event.issue.title }}" \
-            --body "## New Game Built by Claude
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --head game-${{ github.event.issue.number }} --json number --jq '.[0].number')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists, updating..."
+          else
+            gh pr create \
+              --title "Game: ${{ github.event.issue.title }}" \
+              --body "## New Game Built by Claude
 
           This PR adds a new game requested in issue #${{ github.event.issue.number }}.
 
@@ -81,8 +87,9 @@ jobs:
           Closes #${{ github.event.issue.number }}
 
           *Built automatically by Claude*" \
-            --base main \
-            --head game-${{ github.event.issue.number }}
+              --base main \
+              --head game-${{ github.event.issue.number }}
+          fi
 
       - name: Enable auto-merge
         env:
