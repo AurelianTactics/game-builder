@@ -1,6 +1,8 @@
 # Game Builder
 
-Testing using GitHub Actions to trigger Claude.
+Testing using GitHub Actions to trigger Claude. Disabled. Example usage from the output: https://aureliantactics.github.io/game-builder/games/2/
+To renable, revert this: https://github.com/AurelianTactics/game-builder/blob/main/.github/workflows/build-game.yml#L11
+and create a new API key and add to secrets
 
 ## How It Works
 
