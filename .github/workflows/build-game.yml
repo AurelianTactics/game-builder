@@ -7,7 +7,8 @@ on:
 jobs:
   build:
     # Only run if the issue has the game-request label or title starts with [Game]
-    if: contains(github.event.issue.labels.*.name, 'game-request') || startsWith(github.event.issue.title, '[Game]')
+    # remove false and uncomment below to turn it back o n
+    if: false #contains(github.event.issue.labels.*.name, 'game-request') || startsWith(github.event.issue.title, '[Game]')
     runs-on: ubuntu-latest
 
     permissions:
